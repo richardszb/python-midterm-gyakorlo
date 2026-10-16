@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Python midterm gyakorló kvíz – Canvas és Quizlet stílusú tanulókártyák, 92 kérdéssel.">
+  <title>Python Midterm Gyakorló</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%8D%3C/text%3E%3C/svg%3E">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Felső vezérlőpult (Quizlet + Canvas fejléc) -->
+  <header class="border-b border-slate-800/80 bg-slate-900/75 backdrop-blur-md sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 font-bold mono text-lg shadow-inner">
+          Py
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg text-white tracking-tight leading-none">Python Midterm Gyakorló</h1>
+          <span class="text-xs text-slate-400">Canvas &amp; Quizlet Hibrid Mód</span>
+        </div>
+      </div>
+
+      <!-- Szűrő és gombok -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Kérdéslista (oldalsáv) elrejtése / megjelenítése – csak széles képernyőn; mobilon a lista feletti gomb van -->
+        <button id="sidebarHide" type="button" data-action="toggle-desktop-sidebar" aria-controls="sidebar" aria-pressed="true"
+          title="Kérdéslista elrejtése / megjelenítése"
+          class="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700/80 text-xs sm:text-sm font-medium text-slate-200 transition">
+          <span aria-hidden="true">☰</span><span>Lista</span>
+        </button>
+
+        <!-- A lehetőségeket a js/main.js tölti fel a kvízadatokból -->
+        <select id="quizFilter" aria-label="Kvíz kiválasztása"
+          class="bg-slate-800/90 border border-slate-700 text-slate-200 text-xs sm:text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"></select>
+
+        <button id="shuffleBtn" data-action="shuffle" title="Kérdések sorrendjének összekeverése"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700/80 text-xs sm:text-sm font-medium text-slate-200 transition">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>Keverés</span>
+        </button>
+
+        <button id="resetBtn" data-action="reset" title="Előrehaladás törlése és újrakezdés"
+          class="px-3 py-2 rounded-lg border border-red-900/50 bg-red-950/30 hover:bg-red-900/40 text-red-300 text-xs sm:text-sm font-medium transition">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Quizlet stílusú statisztika sáv -->
+    <div class="max-w-7xl mx-auto px-4 pb-3">
+      <div class="flex flex-wrap items-center justify-between text-xs font-medium mb-2 gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span id="roundIndicator" class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+            1. Kör
+          </span>
+          <span id="progressCounter" class="text-slate-300 font-semibold">– / – kérdés</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="flex items-center gap-1.5 text-emerald-400 bg-emerald-950/50 border border-emerald-800/50 px-2.5 py-0.5 rounded-md">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Tudom: <strong id="knownCount">0</strong>
+          </span>
+          <span class="flex items-center gap-1.5 text-rose-400 bg-rose-950/50 border border-rose-800/50 px-2.5 py-0.5 rounded-md">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            Tanulom (Hibás): <strong id="unknownCount">0</strong>
+          </span>
+        </div>
+      </div>
+      <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 0"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Fő tartalom (Canvas kérdéskártya) -->
+  <div class="app-layout flex-grow w-full max-w-7xl mx-auto px-4 py-5 sm:py-8">
+    <!-- Mobilon ezzel nyitható az oldalsáv -->
+    <button id="sidebarToggle" type="button" data-action="toggle-sidebar" aria-controls="sidebar" aria-expanded="false"
+      class="lg:hidden w-full mb-3 px-4 py-2.5 flex items-center justify-between rounded-xl border border-slate-700/80 bg-slate-900/90 text-sm text-slate-200"></button>
+
+    <!-- Bal oldalsáv: számláló + kérdésrács (js/sidebar.js tölti fel) -->
+    <aside id="sidebar" aria-label="Kérdések listája"
+      class="hidden lg:block sidebar-sticky mb-4 lg:mb-0 p-4 rounded-xl border border-slate-700/80 bg-slate-900/90 shadow-xl"></aside>
+
+    <main class="min-w-0">
+      <div id="quizContainer">
+        <noscript>A kvíz működéséhez engedélyezd a JavaScriptet.</noscript>
+      </div>
+    </main>
+  </div>
+
+  <!-- Lábléc -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/40 py-5 text-center text-sm text-slate-400">
+    <p>
+      Made with ❤️ by:
+      <a href="https://github.com/richardszb" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4 transition">
+        richardszb
+      </a>
+    </p>
+  </footer>
+
+  <!-- Kvízadatok (kvízenként egy fájl) -->
+  <script src="js/data/quiz1.js"></script>
+  <script src="js/data/quiz2.js"></script>
+  <script src="js/data/quiz3.js"></script>
+  <script src="js/data/quiz4.js"></script>
+  <script src="js/data/quiz5.js"></script>
+  <script src="js/data/quiz6.js"></script>
+
+  <!-- Alkalmazás -->
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
